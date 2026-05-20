@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Neon Stopwatch</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+body {
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #000;
+}
+
+/* CONTAINER */
+.container {
+    background: rgba(255,255,255,0.05);
+    border-radius: 20px;
+    padding: 35px;
+    width: 400px;
+    text-align: center;
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.1);
+    box-shadow: 0 0 40px rgba(0,255,255,0.2);
+}
+
+/* TITLE */
+h2 {
+    color: #00f2fe;
+    margin-bottom: 15px;
+}
+
+/* TIME */
+.time {
+    font-size: 48px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    letter-spacing: 2px;
+    text-shadow: 0 0 10px rgba(0,255,255,0.6);
+}
+
+#main {
+    color: #ffffff;
+}
+
+#ms {
+    font-size: 22px;
+    color: #00f2fe;
+    margin-left: 5px;
+}
+
+/* BUTTONS */
+.buttons button {
+    padding: 10px 15px;
+    margin: 6px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 600;
+    background: rgba(255,255,255,0.08);
+    color: #fff;
+    transition: 0.3s;
+}
+
+/* GLOW COLORS */
+.start {
+    border: 1px solid #00ff9f;
+    box-shadow: 0 0 10px #00ff9f;
+}
+
+.pause {
+    border: 1px solid #ffd600;
+    box-shadow: 0 0 10px #ffd600;
+}
+
+.reset {
+    border: 1px solid #ff3b3b;
+    box-shadow: 0 0 10px #ff3b3b;
+}
+
+.lap {
+    border: 1px solid #00e5ff;
+    box-shadow: 0 0 10px #00e5ff;
+}
+
+/* HOVER */
+button:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 20px currentColor;
+}
+
+/* LAPS */
+.laps {
+    margin-top: 15px;
+    max-height: 180px;
+    overflow-y: auto;
+    text-align: left;
+}
+
+.laps li {
+    font-size: 14px;
+    padding: 6px;
+    border-bottom: 1px solid rgba(255,255,255,0.2);
+    color: #ddd;
+}
+
+/* SCROLLBAR */
+.laps::-webkit-scrollbar {
+    width: 5px;
+}
+
+.laps::-webkit-scrollbar-thumb {
+    background: #00f2fe;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+    <h2>⏱ Stopwatch</h2>
+
+    <div class="time">
+        <span id="main">00:00:00</span><span id="ms">:000</span>
+    </div>
+
+    <div class="buttons">
+        <button class="start" onclick="start()">Start</button>
+        <button class="pause" onclick="pause()">Pause</button>
+        <button class="reset" onclick="reset()">Reset</button>
+        <button class="lap" onclick="lap()">Lap</button>
+    </div>
+
+    <ul class="laps" id="laps"></ul>
+</div>
+
+<script>
+let startTime, elapsed = 0, timer;
+let running = false;
+let lastLapTime = 0;
+let lapCount = 1;
+
+function format(ms) {
+    let hrs = Math.floor(ms / 3600000);
+    let mins = Math.floor((ms % 3600000) / 60000);
+    let secs = Math.floor((ms % 60000) / 1000);
+    let millis = ms % 1000;
+
+    return (
+        String(hrs).padStart(2, '0') + ":" +
+        String(mins).padStart(2, '0') + ":" +
+        String(secs).padStart(2, '0') + ":" +
+        String(millis).padStart(3, '0')
+    );
+}
+
+function start() {
+    if (!running) {
+        running = true;
+        startTime = Date.now() - elapsed;
+
+        timer = setInterval(() => {
+            elapsed = Date.now() - startTime;
+            let t = format(elapsed);
+
+            document.getElementById("main").innerText = t.slice(0, 8);
+            document.getElementById("ms").innerText = ":" + t.slice(9);
+        }, 10);
+    }
+}
+
+function pause() {
+    running = false;
+    clearInterval(timer);
+}
+
+function reset() {
+    running = false;
+    clearInterval(timer);
+    elapsed = 0;
+    lastLapTime = 0;
+    lapCount = 1;
+
+    document.getElementById("main").innerText = "00:00:00";
+    document.getElementById("ms").innerText = ":000";
+    document.getElementById("laps").innerHTML = "";
+}
+
+function lap() {
+    if (running) {
+        let interval = elapsed - lastLapTime;
+        lastLapTime = elapsed;
+
+        let li = document.createElement("li");
+        li.textContent = `Lap ${lapCount} → Total: ${format(elapsed)} | Interval: ${format(interval)}`;
+        document.getElementById("laps").appendChild(li);
+
+        lapCount++;
+    }
+}
+</script>
+
+</body>
+</html>
